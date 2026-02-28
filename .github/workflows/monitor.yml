@@ -1,0 +1,59 @@
+name: GitHub Release & Commit Monitor
+
+on:
+  schedule:
+    # Every 30 minutes
+    - cron: "*/30 * * * *"
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Restore cached state from previous run
+      - name: Restore state cache
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: monitor-state-${{ github.run_id }}
+          restore-keys: |
+            monitor-state-
+
+      - name: Run monitor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATE_PATH: state.json
+        run: python monitor.py
+
+      # Keep repository active to prevent GitHub from disabling scheduled workflows
+      - name: Keepalive - prevent 60-day inactivity timeout
+        if: github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *'
+        run: |
+          LAST_COMMIT_DATE=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          DAYS_SINCE=$(( (NOW - LAST_COMMIT_DATE) / 86400 ))
+          if [ "$DAYS_SINCE" -ge 50 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "chore: keepalive commit [skip ci]"
+            git push
+            echo "✅ 保活提交已推送（距上次提交 ${DAYS_SINCE} 天）"
+          else
+            echo "✓ 无需保活（距上次提交 ${DAYS_SINCE} 天）"
+          fi
