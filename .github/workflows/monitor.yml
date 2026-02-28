@@ -43,7 +43,7 @@ jobs:
 
       # Keep repository active to prevent GitHub from disabling scheduled workflows
       - name: Keepalive - prevent 60-day inactivity timeout
-        if: github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *'
+        if: github.event_name == 'schedule' && github.event.schedule == '*/10 * * * *'
         run: |
           LAST_COMMIT_DATE=$(git log -1 --format=%ct)
           NOW=$(date +%s)
