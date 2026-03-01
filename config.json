@@ -4,7 +4,14 @@
     "https://github.com/apool-io/apoolminer",
     "https://github.com/doktor83/SRBMiner-Multi",
     "https://github.com/gonka-ai/gonka",
-    "https://github.com/h9-dev/neptune-miner"
+    "https://github.com/h9-dev/neptune-miner",
+    "https://github.com/OneZeroMiner/onezerominer",
+    "https://github.com/rigelminer/rigel",
+    "https://github.com/trexminer/T-Rex",
+    "https://github.com/Lolliedieb/lolMiner-releases",
+    "https://github.com/doktor83/SRBMiner-Multi",
+    "https://github.com/apool-io/apoolminer"
+
   ],
   "check_releases": true,
   "check_commits": false
